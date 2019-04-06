@@ -1,7 +1,15 @@
 package com.example.examplemod;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.SoundType;
+import net.minecraft.block.material.Material;
+import net.minecraft.client.renderer.model.ModelResourceLocation;
 import net.minecraft.init.Blocks;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemBlock;
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.client.event.ModelRegistryEvent;
+import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -28,10 +36,13 @@ public class ExampleMod
     public ExampleMod() {
         // Register the setup method for modloading
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
+
         // Register the enqueueIMC method for modloading
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::enqueueIMC);
+
         // Register the processIMC method for modloading
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::processIMC);
+
         // Register the doClientStuff method for modloading
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::doClientStuff);
 
@@ -75,10 +86,36 @@ public class ExampleMod
     // Event bus for receiving Registry Events)
     @Mod.EventBusSubscriber(bus=Mod.EventBusSubscriber.Bus.MOD)
     public static class RegistryEvents {
+        //custom block
+        private static Block customBlock;
+        private static Block.Properties blockProps;
+        private static ItemBlock itemBlock;
+
         @SubscribeEvent
         public static void onBlocksRegistry(final RegistryEvent.Register<Block> blockRegistryEvent) {
             // register a new block here
             LOGGER.info("HELLO from Register Block");
+
+            // create custom block
+            blockProps = Block.Properties.create(Material.CAKE);
+            blockProps.hardnessAndResistance(0.5f, 2.0f);
+            blockProps.lightValue(15);
+            blockProps.slipperiness(1.0f);
+            blockProps.sound(SoundType.ANVIL);
+
+            customBlock = new Block(blockProps);
+            customBlock.setRegistryName("custom1");
+
+            //register custom block
+            blockRegistryEvent.getRegistry().register(customBlock);
+        }
+
+        @SubscribeEvent
+        public static void onItemsRegistry(final RegistryEvent.Register<Item> itemRegistryEvent) {
+            itemBlock = new ItemBlock(customBlock, new Item.Properties());
+            itemBlock.setRegistryName(customBlock.getRegistryName());
+
+            itemRegistryEvent.getRegistry().register(itemBlock);
         }
     }
 }
